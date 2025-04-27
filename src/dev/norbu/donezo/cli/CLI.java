@@ -1,7 +1,9 @@
 package dev.norbu.donezo.cli;
 
+import dev.norbu.donezo.model.Description;
 import dev.norbu.donezo.model.DueDate;
 import dev.norbu.donezo.model.Task;
+import dev.norbu.donezo.model.Title;
 import dev.norbu.donezo.service.TaskManager;
 import dev.norbu.donezo.storage.InMemoryTaskRepository;
 
@@ -73,9 +75,9 @@ public class CLI {
 
     String title = args.getFirst();
     String description = "";
-    Task.Priority priority;
-    priority = Task.Priority.MEDIUM;
+    Task.Priority priority = Task.Priority.MEDIUM;
     DueDate dueDate = null;
+    Task.Status status = Task.Status.PENDING;
 
     for (int i = 1; i < args.size(); i++) {
       String flag = args.get(i);
@@ -84,24 +86,30 @@ public class CLI {
           if (i + 1 < args.size()) {
             description = args.get(++i);
           } else {
-            System.out.println("Warning: Missing value for flag '-d'.");
+            System.out.println("No description given.");
           }
           break;
         case "-p":
           if (i + 1 < args.size()) {
             priority = getPriority(args.get(++i));
           } else {
-            System.out.println("Warning: Missing value for flag '-p'. Using default MEDIUM.");
-            priority = Task.Priority.MEDIUM;
+            System.out.println("Setting default priority MEDIUM.");
           }
           break;
         case "-due":
           if (i + 1 < args.size()) {
             dueDate = new DueDate(getDueDate(args.get(++i)));
           } else {
-            System.out.println("Warning: Missing value for flag '-due'. Using default in 3 days");
+            System.out.println("Setting default due date in 3 days.");
             dueDate = new DueDate(ZonedDateTime.now()
                                           .plusDays(3));
+          }
+          break;
+        case "-s":
+          if (i + 1 < args.size()) {
+            status = Task.Status.valueOf(args.get(++i));
+          } else {
+            System.out.println("Setting default status PENDING.");
           }
           break;
         default:
@@ -113,7 +121,11 @@ public class CLI {
     }
 
     try {
-      Task task = taskManager.addTask(title, description, priority, dueDate);
+      Task task = taskManager.addTask(new Title(title),
+                                      new Description(description),
+                                      priority,
+                                      dueDate,
+                                      status);
       System.out.printf("Task added with ID: %s%n", task.getId());
     } catch (Exception e) {
       System.err.println("Error adding task: " + e.getMessage());
@@ -134,7 +146,7 @@ public class CLI {
     try {
       var count = taskManager.listTasks()
               .stream()
-              .filter(task -> task.getTitle()
+              .filter(task -> task.getTitleValue()
                       .startsWith(id))
               .map(task -> taskManager.markAsCompleted(task.getId()))
               .count();
@@ -153,7 +165,7 @@ public class CLI {
     String id = args.getFirst();
     var count = taskManager.listTasks()
             .stream()
-            .filter(task -> task.getTitle()
+            .filter(task -> task.getTitleValue()
                     .startsWith(id))
             .map(task -> taskManager.deleteTask(task.getId()))
             .count();

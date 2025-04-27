@@ -1,10 +1,11 @@
 package dev.norbu.donezo.service;
 
+import dev.norbu.donezo.model.Description;
 import dev.norbu.donezo.model.DueDate;
 import dev.norbu.donezo.model.Task;
+import dev.norbu.donezo.model.Title;
 import dev.norbu.donezo.repository.TaskRepository;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,39 +18,32 @@ public class TaskManager {
     this.taskRepository = taskRepository;
   }
 
-  public Task addTask(String title, String description) {
-    return addTask(title,
-                   description,
-                   Task.Priority.MEDIUM,
-                   new DueDate(ZonedDateTime.now()
-                                       .plusDays(3)),
-                   Task.Status.PENDING);
+  public Task addTask(Task task) {
+    addTask(task.getTitle(), task.getDescription(), task.getPriority(), task.getDueDate(),
+            task.getStatus());
   }
 
-  public Task addTask(String title,
-                      String description,
+  public Task addTask(Title title,
+                      Description description,
                       Task.Priority priority,
                       DueDate dueDate,
                       Task.Status status) {
-    var task = Task.of(title, description, priority, dueDate, status);
+    Task task = new Task.Builder().title(title)
+            .description(description)
+            .dueDate(dueDate)
+            .priority(priority)
+            .status(status)
+            .build();
     taskRepository.save(task);
     return task;
   }
 
-  public Task addTask(String title, String description, Task.Priority priority) {
-    return addTask(title,
-                   description,
-                   priority,
-                   new DueDate(ZonedDateTime.now()
-                                       .plusDays(3)),
-                   Task.Status.PENDING);
-  }
-
-  public Task addTask(String title,
-                      String description,
-                      Task.Priority priority,
-                      DueDate dueDate) {
-    return addTask(title, description, priority, dueDate, Task.Status.PENDING);
+  public Task addTask(Title title, Description description) {
+    Task task = new Task.Builder().title(title)
+            .description(description)
+            .build();
+    taskRepository.save(task);
+    return task;
   }
 
   public List<Task> listTasks() {
@@ -63,8 +57,7 @@ public class TaskManager {
   public boolean markAsCompleted(UUID id) {
     return taskRepository.findById(id)
             .map(task -> {
-              task.markAsCompleted();
-              taskRepository.update(task);
+              taskRepository.update(task.markAsCompleted());
               return true;
             })
             .orElse(false);
