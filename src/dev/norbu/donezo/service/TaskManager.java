@@ -19,8 +19,8 @@ public class TaskManager {
   }
 
   public Task addTask(Task task) {
-    addTask(task.getTitle(), task.getDescription(), task.getPriority(), task.getDueDate(),
-            task.getStatus());
+    return addTask(task.getTitle(), task.getDescription(), task.getPriority(), task.getDueDate(),
+                   task.getStatus());
   }
 
   public Task addTask(Title title,
@@ -28,7 +28,8 @@ public class TaskManager {
                       Task.Priority priority,
                       DueDate dueDate,
                       Task.Status status) {
-    Task task = new Task.Builder().title(title)
+    Task task = new Task.Builder()
+            .title(title)
             .description(description)
             .dueDate(dueDate)
             .priority(priority)
@@ -39,7 +40,8 @@ public class TaskManager {
   }
 
   public Task addTask(Title title, Description description) {
-    Task task = new Task.Builder().title(title)
+    Task task = new Task.Builder()
+            .title(title)
             .description(description)
             .build();
     taskRepository.save(task);
@@ -55,7 +57,8 @@ public class TaskManager {
   }
 
   public boolean markAsCompleted(UUID id) {
-    return taskRepository.findById(id)
+    return taskRepository
+            .findById(id)
             .map(task -> {
               taskRepository.update(task.markAsCompleted());
               return true;
@@ -64,7 +67,8 @@ public class TaskManager {
   }
 
   public boolean deleteTask(UUID id) {
-    return taskRepository.findById(id)
+    return taskRepository
+            .findById(id)
             .map(_ -> {
               taskRepository.deleteById(id);
               return true;

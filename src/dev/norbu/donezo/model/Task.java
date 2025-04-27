@@ -37,14 +37,7 @@ public final class Task {
   }
 
   public Task markAsCompleted() {
-    if (this.getStatus() == Status.COMPLETED) {
-      System.out.println("Task is already completed.");
-    }
     return withStatus(Status.COMPLETED);
-  }
-
-  public Status getStatus() {
-    return status;
   }
 
   public Task withStatus(Status status) {
@@ -55,8 +48,13 @@ public final class Task {
     return new Task(this.id, this.title, this.description, this.priority, this.dueDate, status);
   }
 
+  public Status getStatus() {
+    return status;
+  }
+
   public boolean isOverdue() {
-    return status == Status.PENDING && dueDate != null && getDueDate().value()
+    return status == Status.PENDING && dueDate != null && getDueDate()
+            .value()
             .isBefore(ZonedDateTime.now());
   }
 
@@ -127,7 +125,8 @@ public final class Task {
     private Title title;
     private Description description;
     private Priority priority = Priority.MEDIUM;
-    private DueDate dueDate = new DueDate(ZonedDateTime.now()
+    private DueDate dueDate = new DueDate(ZonedDateTime
+                                                  .now()
                                                   .plusDays(3));
     private Status status = Status.PENDING;
 
