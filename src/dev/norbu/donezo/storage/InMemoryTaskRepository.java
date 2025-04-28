@@ -13,54 +13,35 @@ import java.util.UUID;
 public class InMemoryTaskRepository
         implements TaskRepository {
 
-  private final Map<UUID, Task> tasks = new LinkedHashMap<>();
+    private final Map<UUID, Task> tasks = new LinkedHashMap<>();
 
-  /**
-   * @param task
-   */
-  @Override
-  public void save(Task task) {
-    tasks.put(UUID.randomUUID(), task);
-  }
+    @Override
+    public void save(Task task) {
+        tasks.put(UUID.randomUUID(), task);
+    }
 
-  /**
-   * @param id
-   * @return @Link List of Tasks
-   */
-  @Override
-  public Optional<Task> findById(UUID id) {
-    return Optional.ofNullable(tasks.get(id));
-  }
+    @Override
+    public Optional<Task> findById(UUID id) {
+        return Optional.ofNullable(tasks.get(id));
+    }
 
-  /**
-   * @return
-   */
-  @Override
-  public List<Task> findAll() {
-    return new ArrayList<>(tasks.values());
-  }
+    @Override
+    public List<Task> findAll() {
+        return new ArrayList<>(tasks.values());
+    }
 
-  /**
-   * @param id
-   */
-  @Override
-  public void deleteById(UUID id) {
-    tasks.remove(id);
-  }
+    @Override
+    public void deleteById(UUID id) {
+        tasks.remove(id);
+    }
 
-  /**
-   * @param task
-   */
-  @Override
-  public void update(Task task) {
-    tasks.put(task.getId(), task);
-  }
+    @Override
+    public void update(Task task) {
+        tasks.put(task.getId(), task);
+    }
 
-  /**
-   * @param taskList List of Tasks
-   */
-  @Override
-  public void saveAll(List<Task> taskList) {
-    taskList.forEach(task -> tasks.put(task.getId(), task));
-  }
+    @Override
+    public void saveAll(List<Task> taskList) {
+        taskList.forEach(task -> tasks.put(task.getId(), task));
+    }
 }

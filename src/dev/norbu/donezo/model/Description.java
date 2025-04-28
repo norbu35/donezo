@@ -3,7 +3,7 @@ package dev.norbu.donezo.model;
 public record Description(String value) {
 
   public Description {
-    if (value == null || value.isBlank()) {
+    if (value.isBlank()) {
       value = "";
     } else {
       value = value.strip();

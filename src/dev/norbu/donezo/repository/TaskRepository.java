@@ -8,15 +8,15 @@ import java.util.UUID;
 
 public interface TaskRepository {
 
-  void save(Task task);
+    void save(Task task);
 
-  Optional<Task> findById(UUID id);
+    Optional<Task> findById(UUID id);
 
-  List<Task> findAll();
+    List<Task> findAll();
 
-  void deleteById(UUID id);
+    void deleteById(UUID id);
 
-  void update(Task task);
+    void update(Task task);
 
-  void saveAll(List<Task> tasks);
+    void saveAll(List<Task> tasks);
 }

@@ -12,75 +12,92 @@ import java.util.UUID;
 
 public class TaskManager {
 
-  private final TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-  public TaskManager(TaskRepository taskRepository) {
-    this.taskRepository = taskRepository;
-  }
+    public TaskManager(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository;
+    }
 
-  public Task addTask(Task task) {
-    return addTask(task.getTitle(), task.getDescription(), task.getPriority(), task.getDueDate(),
-                   task.getStatus());
-  }
+    public List<Task> listTasks() {
+        return taskRepository.findAll();
+    }
 
-  public Task addTask(Title title,
-                      Description description,
-                      Task.Priority priority,
-                      DueDate dueDate,
-                      Task.Status status) {
-    Task task = new Task.Builder()
-            .title(title)
-            .description(description)
-            .dueDate(dueDate)
-            .priority(priority)
-            .status(status)
-            .build();
-    taskRepository.save(task);
-    return task;
-  }
+    public Task addTask(Task task) {
+        return addTask(task.getTitle(),
+                       task.getDescription(),
+                       task.getPriority(),
+                       task.getDueDate(),
+                       task.getStatus());
+    }
 
-  public Task addTask(Title title, Description description) {
-    Task task = new Task.Builder()
-            .title(title)
-            .description(description)
-            .build();
-    taskRepository.save(task);
-    return task;
-  }
+    public Task addTask(Title title,
+                        Description description,
+                        Task.Priority priority,
+                        DueDate dueDate,
+                        Task.Status status) {
+        Task task = new Task.Builder()
+                .title(title)
+                .description(description)
+                .dueDate(dueDate)
+                .priority(priority)
+                .status(status)
+                .build();
+        taskRepository.save(task);
+        return task;
+    }
 
-  public List<Task> listTasks() {
-    return taskRepository.findAll();
-  }
+    public Task addTask(Title title, Description description) {
+        Task task = new Task.Builder()
+                .title(title)
+                .description(description)
+                .build();
+        taskRepository.save(task);
+        return task;
+    }
 
-  public void updateTask(Task task) {
-    taskRepository.update(task);
-  }
+    public void updateTask(Task task) {
+        taskRepository.update(task);
+    }
 
-  public boolean markAsCompleted(UUID id) {
-    return taskRepository
-            .findById(id)
-            .map(task -> {
-              taskRepository.update(task.markAsCompleted());
-              return true;
-            })
-            .orElse(false);
-  }
+    public void updateTask(Title title,
+                           Description description,
+                           Task.Priority priority,
+                           DueDate dueDate,
+                           Task.Status status) {
+        taskRepository.update(new Task.Builder()
+                                      .title(title)
+                                      .description(description)
+                                      .priority(priority)
+                                      .dueDate(dueDate)
+                                      .status(status)
+                                      .build());
+    }
 
-  public boolean deleteTask(UUID id) {
-    return taskRepository
-            .findById(id)
-            .map(_ -> {
-              taskRepository.deleteById(id);
-              return true;
-            })
-            .orElse(false);
-  }
+    public boolean markAsCompleted(UUID id) {
+        return taskRepository
+                .findById(id)
+                .map(task -> {
+                    taskRepository.update(task.markAsCompleted());
+                    return true;
+                })
+                .orElse(false);
+    }
 
-  public Optional<Task> getTask(UUID id) {
-    return taskRepository.findById(id);
-  }
+    public boolean deleteTask(UUID id) {
+        return taskRepository
+                .findById(id)
+                .map(_ -> {
+                    taskRepository.deleteById(id);
+                    return true;
+                })
+                .orElse(false);
+    }
 
-  public void saveAll(List<Task> tasks) {
-    taskRepository.saveAll(tasks);
-  }
+    public Optional<Task> getTask(UUID id) {
+        return taskRepository.findById(id);
+    }
+
+    public void saveAll(List<Task> tasks) {
+        taskRepository.saveAll(tasks);
+    }
 }

@@ -17,30 +17,39 @@ public class Tests {
     tasks.forEach(System.out::println);
 
     // Check created task
-    Task task1 = new Task.Builder()
+    var task1 = new Task.Builder()
             .title("test task")
             .build();
-    var addedTask =
-            taskManager.addTask(task1);
-
-    assert (taskManager.getTask(addedTask.getId())
+    var addedTask = taskManager.addTask(task1);
+    assert taskManager
+            .getTask(addedTask.getId())
             .orElseThrow()
-            .equals(addedTask));
+            .equals(addedTask);
 
     // Update task
-    Task task2 = new Task.Builder()
+    var task2 = new Task.Builder()
             .title("Test title")
             .description(new Description("test desc"))
             .build();
     taskManager.updateTask(task2);
-    assert (taskManager.getTask(task2.getId())
+    assert taskManager
+            .getTask(task2.getId())
             .orElseThrow()
             .getPriority()
-            .equals(Task.Priority.MEDIUM));
+            .equals(Task.Priority.MEDIUM);
+
+    // Mark task as complete
+    var task3 = new Task.Builder()
+            .title("test task")
+            .status(Task.Status.PENDING)
+            .build();
+    boolean updated = taskManager.markAsCompleted(task3.getId());
+    assert updated && task3.getStatus() == Task.Status.COMPLETED;
 
     // Delete task
     taskManager.deleteTask(task1.getId());
-    assert (taskManager.getTask(task1.getId())
-            .isEmpty());
+    assert taskManager
+            .getTask(task1.getId())
+            .isEmpty();
   }
 }
