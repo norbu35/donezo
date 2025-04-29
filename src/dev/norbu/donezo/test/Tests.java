@@ -1,55 +1,64 @@
 package dev.norbu.donezo.test;
 
-import dev.norbu.donezo.model.Description;
 import dev.norbu.donezo.model.Task;
+import dev.norbu.donezo.model.Title;
 import dev.norbu.donezo.repository.TaskRepository;
 import dev.norbu.donezo.service.TaskManager;
 import dev.norbu.donezo.storage.InMemoryTaskRepository;
 
 public class Tests {
 
-  public static void run() {
-    TaskRepository taskRepository = new InMemoryTaskRepository();
-    TaskManager taskManager = new TaskManager(taskRepository);
+    private Tests() {
+    }
 
-    // List tasks
-    var tasks = taskRepository.findAll();
-    tasks.forEach(System.out::println);
+    public static void run() {
+        TaskRepository taskRepository = new InMemoryTaskRepository();
+        TaskManager taskManager = new TaskManager(taskRepository);
 
-    // Check created task
-    var task1 = new Task.Builder()
-            .title("test task")
-            .build();
-    var addedTask = taskManager.addTask(task1);
-    assert taskManager
-            .getTask(addedTask.getId())
-            .orElseThrow()
-            .equals(addedTask);
+        // Check created task
+        var task1 = new Task.Builder().title("Task 1")
+                .description("Test task")
+                .status(Task.Status.PENDING)
+                .build();
 
-    // Update task
-    var task2 = new Task.Builder()
-            .title("Test title")
-            .description(new Description("test desc"))
-            .build();
-    taskManager.updateTask(task2);
-    assert taskManager
-            .getTask(task2.getId())
-            .orElseThrow()
-            .getPriority()
-            .equals(Task.Priority.MEDIUM);
+        taskManager.addTask(task1);
 
-    // Mark task as complete
-    var task3 = new Task.Builder()
-            .title("test task")
-            .status(Task.Status.PENDING)
-            .build();
-    boolean updated = taskManager.markAsCompleted(task3.getId());
-    assert updated && task3.getStatus() == Task.Status.COMPLETED;
+        var fetchedTask = taskManager.getTask(task1.getId()).orElseThrow();
+        assert fetchedTask.equals(task1);
 
-    // Delete task
-    taskManager.deleteTask(task1.getId());
-    assert taskManager
-            .getTask(task1.getId())
-            .isEmpty();
-  }
+        // Update task
+        var task2 = Task.from(task1.getId(),
+                              new Title("Updated task"),
+                              task1.getDescription(),
+                              task1.getPriority(),
+                              task1.getDueDate(),
+                              task1.getStatus());
+
+        taskManager.updateTask(task2);
+
+        fetchedTask = taskManager.getTask(task1.getId()).orElseThrow();
+        assert fetchedTask.getTitle().value().equals("Updated task");
+
+        // List tasks
+        var tasks = taskRepository.findAll();
+        tasks.forEach(System.out::println);
+
+        // Mark task as complete
+        var task3 = new Task.Builder()
+                .title("test task 3")
+                .status(Task.Status.PENDING)
+                .build();
+
+        taskManager.addTask(task3);
+        taskManager.markAsCompleted(task3.getId());
+
+        assert taskManager.getTask(task3.getId())
+                .orElseThrow()
+                .getStatus()
+                .equals(Task.Status.COMPLETED);
+
+        // Delete task
+        taskManager.deleteTask(task1.getId());
+        assert taskManager.getTask(task1.getId()).isEmpty();
+    }
 }

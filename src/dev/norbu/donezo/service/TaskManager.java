@@ -8,7 +8,6 @@ import dev.norbu.donezo.repository.TaskRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class TaskManager {
 
@@ -18,39 +17,34 @@ public class TaskManager {
         this.taskRepository = taskRepository;
     }
 
-    public List<Task> listTasks() {
-        return taskRepository.findAll();
+    public void addTask(Task task) {
+        addTask(task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.getPriority(),
+                task.getDueDate(),
+                task.getStatus());
     }
 
-    public Task addTask(Task task) {
-        return addTask(task.getTitle(),
-                       task.getDescription(),
-                       task.getPriority(),
-                       task.getDueDate(),
-                       task.getStatus());
-    }
-
-    public Task addTask(Title title,
+    public void addTask(String id,
+                        Title title,
                         Description description,
                         Task.Priority priority,
                         DueDate dueDate,
                         Task.Status status) {
-        Task task = new Task.Builder()
-                .title(title)
-                .description(description)
-                .dueDate(dueDate)
-                .priority(priority)
-                .status(status)
-                .build();
-        taskRepository.save(task);
-        return task;
+        taskRepository.save(Task.from(id, title, description, priority, dueDate, status));
+    }
+
+    public void addTask(Title title,
+                        Description description,
+                        Task.Priority priority,
+                        DueDate dueDate,
+                        Task.Status status) {
+        taskRepository.save(Task.from(title, description, priority, dueDate, status));
     }
 
     public Task addTask(Title title, Description description) {
-        Task task = new Task.Builder()
-                .title(title)
-                .description(description)
-                .build();
+        Task task = new Task.Builder().title(title).description(description).build();
         taskRepository.save(task);
         return task;
     }
@@ -64,8 +58,7 @@ public class TaskManager {
                            Task.Priority priority,
                            DueDate dueDate,
                            Task.Status status) {
-        taskRepository.update(new Task.Builder()
-                                      .title(title)
+        taskRepository.update(new Task.Builder().title(title)
                                       .description(description)
                                       .priority(priority)
                                       .dueDate(dueDate)
@@ -73,9 +66,8 @@ public class TaskManager {
                                       .build());
     }
 
-    public boolean markAsCompleted(UUID id) {
-        return taskRepository
-                .findById(id)
+    public boolean markAsCompleted(String id) {
+        return taskRepository.findById(id)
                 .map(task -> {
                     taskRepository.update(task.markAsCompleted());
                     return true;
@@ -83,18 +75,38 @@ public class TaskManager {
                 .orElse(false);
     }
 
-    public boolean deleteTask(UUID id) {
-        return taskRepository
-                .findById(id)
-                .map(_ -> {
-                    taskRepository.deleteById(id);
-                    return true;
-                })
-                .orElse(false);
+    public void deleteTask(String id) {
+        taskRepository.deleteById(id);
     }
 
-    public Optional<Task> getTask(UUID id) {
-        return taskRepository.findById(id);
+    public Optional<Task> getTask(String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("ID cannot be empty.");
+        }
+        if (id.length() < 4) {
+            throw new IllegalArgumentException(
+                    "Provide at least the first 4 characters of the ID" + ".");
+        }
+
+        String matched = null;
+
+        for (Task task : taskRepository.findAll()) {
+            if (task.getId().startsWith(id)) {
+                if (matched != null) {
+                    throw new IllegalArgumentException(
+                            "Several matches found. Provide a more specific ID.");
+                }
+                matched = task.getId();
+            }
+        }
+
+        return matched != null
+                ? taskRepository.findById(matched)
+                : Optional.empty();
+    }
+
+    public List<Task> listTasks() {
+        return taskRepository.findAll();
     }
 
     public void saveAll(List<Task> tasks) {

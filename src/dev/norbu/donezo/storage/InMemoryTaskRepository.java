@@ -8,20 +8,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public class InMemoryTaskRepository
         implements TaskRepository {
 
-    private final Map<UUID, Task> tasks = new LinkedHashMap<>();
+    private final Map<String, Task> tasks = new LinkedHashMap<>();
 
     @Override
     public void save(Task task) {
-        tasks.put(UUID.randomUUID(), task);
+        tasks.put(task.getId(), task);
     }
 
     @Override
-    public Optional<Task> findById(UUID id) {
+    public Optional<Task> findById(String id) {
         return Optional.ofNullable(tasks.get(id));
     }
 
@@ -31,7 +30,7 @@ public class InMemoryTaskRepository
     }
 
     @Override
-    public void deleteById(UUID id) {
+    public void deleteById(String id) {
         tasks.remove(id);
     }
 

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public final class Task {
 
-    private final UUID id;
+    private final String id;
     private final Title title;
     private final Description description;
     private final DueDate dueDate;
@@ -14,7 +14,7 @@ public final class Task {
     private final Priority priority;
 
     private Task(Builder builder) {
-        this(UUID.randomUUID(),
+        this(UUID.randomUUID().toString(),
              builder.title,
              builder.description,
              builder.priority,
@@ -22,7 +22,7 @@ public final class Task {
              builder.status);
     }
 
-    private Task(UUID id,
+    private Task(String id,
                  Title title,
                  Description description,
                  Priority priority,
@@ -36,16 +36,31 @@ public final class Task {
         this.status      = Objects.requireNonNull(status, "status cannot be null");
     }
 
-    public static Task from(Task other) {
-        return new Task(other.id,
-                        other.title,
-                        other.description,
-                        other.priority,
-                        other.dueDate,
-                        other.status);
+    private Task(Title title,
+                 Description description,
+                 Priority priority,
+                 DueDate dueDate,
+                 Status status) {
+        this(UUID.randomUUID().toString(), title, description, priority, dueDate, status);
     }
 
-    public static Task from(UUID id,
+    public static Task from(String title, String description) {
+        return from(new Title(title),
+                    new Description(description),
+                    Priority.MEDIUM,
+                    new DueDate(ZonedDateTime.now().plusDays(3)),
+                    Status.PENDING);
+    }
+
+    public static Task from(Title title,
+                            Description description,
+                            Priority priority,
+                            DueDate dueDate,
+                            Status status) {
+        return new Task(title, description, priority, dueDate, status);
+    }
+
+    public static Task from(String id,
                             Title title,
                             Description description,
                             Priority priority,
@@ -67,16 +82,15 @@ public final class Task {
     }
 
     public boolean isOverdue() {
-        return status == Status.PENDING && dueDate != null && getDueDate()
-                .value()
-                .isBefore(ZonedDateTime.now());
+        return status == Status.PENDING && dueDate != null &&
+                getDueDate().value().isBefore(ZonedDateTime.now());
     }
 
     public DueDate getDueDate() {
         return dueDate;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
@@ -119,12 +133,19 @@ public final class Task {
     @Override
     public String toString() {
         return String.format("""
+                                     ID: %s
                                      Title: %s
                                      Description: %s
                                      Priority: %s
                                      Due date: %tF
                                      Status: %s
-                                     """, title, description, priority, dueDate.value(), status);
+                                     """,
+                             id,
+                             title,
+                             description,
+                             priority,
+                             dueDate.value(),
+                             status);
     }
 
     public enum Status {
@@ -133,9 +154,7 @@ public final class Task {
 
         public static Status fromString(String value) {
             try {
-                return Status.valueOf(value
-                                              .trim()
-                                              .toUpperCase());
+                return Status.valueOf(value.trim().toUpperCase());
             } catch (NullPointerException e) {
                 throw new NullPointerException();
             }
@@ -148,9 +167,7 @@ public final class Task {
         HIGH;
 
         public static Priority fromString(String value) {
-            return Priority.valueOf(value
-                                            .trim()
-                                            .toUpperCase());
+            return Priority.valueOf(value.trim().toUpperCase());
         }
     }
 
@@ -159,9 +176,7 @@ public final class Task {
         private Title title;
         private Description description = new Description("");
         private Priority priority = Priority.MEDIUM;
-        private DueDate dueDate = new DueDate(ZonedDateTime
-                                                      .now()
-                                                      .plusDays(3));
+        private DueDate dueDate = new DueDate(ZonedDateTime.now().plusDays(3));
         private Status status = Status.PENDING;
 
         public Builder title(Title title) {
