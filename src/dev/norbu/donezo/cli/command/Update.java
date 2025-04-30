@@ -66,9 +66,6 @@ public class Update
             System.err.printf("Task with id %s not found", args.getFirst());
         } catch (DateTimeParseException e) {
             System.err.println("Invalid date input: " + e.getMessage() + "\nUsage: yyyy-MM-dd.");
-        } catch (Exception e) {
-            System.err.printf("Unexpected error while updating task: %s", e.getMessage());
-            e.printStackTrace();
         }
     }
 

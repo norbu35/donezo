@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 class ArgParser {
@@ -16,14 +17,15 @@ class ArgParser {
     private final Map<String, String> options = new HashMap<>();
     private final String first;
 
-    ArgParser(List<String> args) {
+    ArgParser(final List<String> args) {
         if (args.isEmpty()) {
             throw new IllegalArgumentException("No arguments provided.");
         }
         first = args.getFirst();
+        Objects.requireNonNull(first, "Command identifier cannot be null.");
 
         for (int i = 1; i < args.size(); i++) {
-            String key = args.get(i);
+            final String key = args.get(i);
             if (key.startsWith("-")
                     && i + 1 < args.size()
                     && !args.get(i + 1).startsWith("-")) {
@@ -34,10 +36,10 @@ class ArgParser {
     }
 
     public static DueDate parseDueDate(String date) {
-        LocalTime localTime = LocalTime.now();
-        LocalDate localDate = LocalDate.parse(date);
-        ZoneId zoneId = ZoneId.systemDefault();
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, localTime, zoneId);
+        final LocalTime localTime = LocalTime.now();
+        final LocalDate localDate = LocalDate.parse(date);
+        final ZoneId zoneId = ZoneId.systemDefault();
+        final ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, localTime, zoneId);
 
         return new DueDate(zonedDateTime);
     }
@@ -46,7 +48,7 @@ class ArgParser {
         return first;
     }
 
-    Optional<String> getValue(String flag) {
+    Optional<String> getValue(final String flag) {
         return Optional.ofNullable(options.get(flag));
     }
 }

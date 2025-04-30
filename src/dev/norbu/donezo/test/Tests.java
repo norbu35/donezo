@@ -16,8 +16,7 @@ public class Tests {
         TaskService taskService = new TaskService(taskRepository);
 
         // Check created task
-        var task1 = Task.builder()
-                .title("Task 1")
+        var task1 = Task.builder("Task 1")
                 .description("Test task")
                 .status(Task.Status.PENDING)
                 .build();
@@ -45,7 +44,9 @@ public class Tests {
         tasks.forEach(System.out::println);
 
         // Mark task as complete
-        var task3 = Task.builder().title("test task 3").status(Task.Status.PENDING).build();
+        var task3 = Task.builder("Task 1")
+                .status(Task.Status.PENDING)
+                .build();
 
         taskService.save(task3);
         taskService.markAsCompleted(task3.getId());

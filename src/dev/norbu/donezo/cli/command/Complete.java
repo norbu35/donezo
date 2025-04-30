@@ -4,19 +4,22 @@ import dev.norbu.donezo.service.TaskService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class Complete
         implements Command {
 
     private final TaskService taskService;
 
-    public Complete(TaskService taskService) {
+    public Complete(final TaskService taskService) {
         this.taskService = taskService;
     }
 
     @Override
-    public void execute(List<String> args) {
-        String id = args.getFirst();
+    public void execute(final List<String> args) {
+        final String id = args.getFirst();
+        Objects.requireNonNull(id, "ID of task cannot be null.");
+
         try {
             if (!taskService.markAsCompleted(id)) {
                 throw new RuntimeException("Marking as complete failed.");

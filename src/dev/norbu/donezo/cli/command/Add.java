@@ -14,36 +14,35 @@ public class Add
 
     private final TaskService taskService;
 
-    public Add(TaskService taskService) {
+    public Add(final TaskService taskService) {
         this.taskService = taskService;
     }
 
     @Override
-    public void execute(List<String> args) {
+    public void execute(final List<String> args) {
         try {
-            var argParser = new ArgParser(args);
+            final var argParser = new ArgParser(args);
 
-            Title title = Title.of(argParser.getFirst());
-            Description taskDescription = argParser
+            final Title title = Title.of(argParser.getFirst());
+            final Description taskDescription = argParser
                     .getValue(Constants.DESCRIPTION_FLAG)
                     .map(Description::new)
-                    .orElse(Description.of(""));
-            Task.Priority priority = argParser
+                    .orElse(Description.empty());
+            final Task.Priority priority = argParser
                     .getValue(Constants.PRIORITY_FLAG)
                     .map(Task.Priority::fromString)
                     .orElse(Task.Priority.MEDIUM);
-            DueDate dueDate = argParser
+            final DueDate dueDate = argParser
                     .getValue(Constants.DUE_FLAG)
                     .map(ArgParser::parseDueDate)
                     .orElse(DueDate.inDays(3));
-            Task.Status status = argParser
+            final Task.Status status = argParser
                     .getValue(Constants.STATUS_FLAG)
                     .map(Task.Status::fromString)
                     .orElse(Task.Status.PENDING);
 
-            Task task =
-                    Task.builder()
-                            .title(title)
+            final Task task =
+                    Task.builder(title)
                             .description(taskDescription)
                             .priority(priority)
                             .dueDate(dueDate)
@@ -54,9 +53,6 @@ public class Add
             System.err.println("Invalid input: " + e.getMessage());
         } catch (DateTimeParseException e) {
             System.err.println("Invalid date input: " + e.getMessage() + "\nUsage: yyyy-MM-dd.");
-        } catch (Exception e) {
-            System.err.printf("Unexpected error while adding task: %s.", e.getMessage());
-            e.printStackTrace();
         }
     }
 

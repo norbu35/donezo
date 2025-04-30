@@ -8,12 +8,12 @@ public class Help
 
     private final Map<String, Command> commands;
 
-    public Help(Map<String, Command> commands) {
+    public Help(final Map<String, Command> commands) {
         this.commands = commands;
     }
 
     @Override
-    public void execute(List<String> args) {
+    public void execute(final List<String> args) {
         System.out.println("Available commands:\n");
         commands
                 .values()

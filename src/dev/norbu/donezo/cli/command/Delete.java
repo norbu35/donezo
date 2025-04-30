@@ -4,28 +4,27 @@ import dev.norbu.donezo.service.TaskService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class Delete
         implements Command {
 
     private final TaskService taskService;
 
-    public Delete(TaskService taskService) {
+    public Delete(final TaskService taskService) {
         this.taskService = taskService;
     }
 
     @Override
-    public void execute(List<String> args) {
+    public void execute(final List<String> args) {
+        Objects.requireNonNull(args);
         try {
-            String id = args.getFirst();
+            final String id = args.getFirst();
             taskService.deleteById(id);
         } catch (IllegalArgumentException _) {
             System.err.printf("Invalid task ID: %s", args.getFirst());
         } catch (NoSuchElementException _) {
             System.err.printf("No task with ID: %s found.", args.getFirst());
-        } catch (Exception e) {
-            System.err.printf("Unexpected error while deleting task: %s", e.getMessage());
-            e.printStackTrace();
         }
     }
 

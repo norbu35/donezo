@@ -12,12 +12,9 @@ public final class Parser {
             // Matches the content between double quotes or non-quoted words
             Pattern.compile("\"([^\"]*)\"|([^\\s\"]+)");
 
-    private Parser() {
-    }
-
-    public static Result parse(String input) {
-        Matcher matcher = TOKEN_PATTERN.matcher(input.trim());
-        List<String> tokens = new ArrayList<>();
+    public static Result parse(final String input) {
+        final Matcher matcher = TOKEN_PATTERN.matcher(input.trim());
+        final List<String> tokens = new ArrayList<>();
 
         while (matcher.find()) {
             String quoted = matcher.group(1);

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class CLI {
+public final class CLI {
 
     private static final TaskService taskService = new TaskService(new InMemoryTaskRepository());
     private static final Scanner scanner = new Scanner(System.in);
@@ -41,7 +41,12 @@ public class CLI {
             if (line.isBlank()) continue;
             if (line.equalsIgnoreCase("exit")) break;
 
-            handleCommand(line);
+            try {
+                handleCommand(line);
+            } catch (Exception e) {
+                System.err.println("An unexpected error occurred: " + e.getMessage());
+                e.printStackTrace();
+            }
             System.out.println("Run another command or type 'exit' to quit.");
         }
 
@@ -57,9 +62,9 @@ public class CLI {
         commands.put(Constants.DELETE_COMMAND, new Delete(taskService));
     }
 
-    private static void handleCommand(String input) {
-        Parser.Result parsedCommand = Parser.parse(input);
-        Command command = commands.get(parsedCommand.name());
+    private static void handleCommand(final String input) {
+        final Parser.Result parsedCommand = Parser.parse(input);
+        final Command command = commands.get(parsedCommand.name());
         if (command != null) {
             commands.get(parsedCommand.name()).execute(parsedCommand.args());
         } else {
