@@ -30,13 +30,8 @@ public class InMemoryTaskRepository
     }
 
     @Override
-    public void deleteById(String id) {
-        tasks.remove(id);
-    }
-
-    @Override
-    public void update(Task task) {
-        tasks.put(task.getId(), task);
+    public boolean deleteById(String id) {
+        return tasks.remove(id) != null;
     }
 
     @Override

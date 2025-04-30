@@ -36,36 +36,20 @@ public final class Task {
         this.status      = Objects.requireNonNull(status, "status cannot be null");
     }
 
-    private Task(Title title,
-                 Description description,
-                 Priority priority,
-                 DueDate dueDate,
-                 Status status) {
-        this(UUID.randomUUID().toString(), title, description, priority, dueDate, status);
+    public static Task createSimple(String title, String description) {
+        return builder().title(title).description(description).build();
     }
 
-    public static Task from(String title, String description) {
-        return from(new Title(title),
-                    new Description(description),
-                    Priority.MEDIUM,
-                    new DueDate(ZonedDateTime.now().plusDays(3)),
-                    Status.PENDING);
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public static Task from(Title title,
-                            Description description,
-                            Priority priority,
-                            DueDate dueDate,
-                            Status status) {
-        return new Task(title, description, priority, dueDate, status);
-    }
-
-    public static Task from(String id,
-                            Title title,
-                            Description description,
-                            Priority priority,
-                            DueDate dueDate,
-                            Status status) {
+    public static Task of(String id,
+                          Title title,
+                          Description description,
+                          Priority priority,
+                          DueDate dueDate,
+                          Status status) {
         return new Task(id, title, description, priority, dueDate, status);
     }
 
@@ -98,16 +82,8 @@ public final class Task {
         return title;
     }
 
-    public String getTitleValue() {
-        return title.value();
-    }
-
     public Description getDescription() {
         return description;
-    }
-
-    public String getDescriptionValue() {
-        return description.value();
     }
 
     public Priority getPriority() {
@@ -153,11 +129,11 @@ public final class Task {
         COMPLETED;
 
         public static Status fromString(String value) {
-            try {
-                return Status.valueOf(value.trim().toUpperCase());
-            } catch (NullPointerException e) {
-                throw new NullPointerException();
+            if (value == null) {
+                throw new IllegalArgumentException("Status value cannot be null.");
             }
+
+            return Status.valueOf(value.trim().toUpperCase());
         }
     }
 
@@ -167,6 +143,10 @@ public final class Task {
         HIGH;
 
         public static Priority fromString(String value) {
+            if (value == null) {
+                throw new IllegalArgumentException("Status value cannot be null.");
+            }
+
             return Priority.valueOf(value.trim().toUpperCase());
         }
     }
@@ -174,18 +154,18 @@ public final class Task {
     public static class Builder {
 
         private Title title;
-        private Description description = new Description("");
+        private Description description = Description.of("");
         private Priority priority = Priority.MEDIUM;
-        private DueDate dueDate = new DueDate(ZonedDateTime.now().plusDays(3));
+        private DueDate dueDate = DueDate.inDays(3);
         private Status status = Status.PENDING;
 
-        public Builder title(Title title) {
-            this.title = title;
+        public Builder title(String title) {
+            this.title = Title.of(title);
             return this;
         }
 
-        public Builder title(String title) {
-            this.title = new Title(title);
+        public Builder title(Title title) {
+            this.title = title;
             return this;
         }
 
@@ -195,7 +175,7 @@ public final class Task {
         }
 
         public Builder description(String description) {
-            this.description = new Description(description);
+            this.description = Description.of(description);
             return this;
         }
 

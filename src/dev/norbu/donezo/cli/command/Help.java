@@ -17,7 +17,7 @@ public class Help
         System.out.println("Available commands:\n");
         commands
                 .values()
-                .forEach(System.out::println);
+                .forEach(command -> System.out.println(command.description()));
     }
 
     @Override

@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +24,9 @@ class ArgParser {
 
         for (int i = 1; i < args.size(); i++) {
             String key = args.get(i);
-            if (key.startsWith("-") && i + 1 < args.size() && !args
-                    .get(i + 1)
-                    .startsWith("-")) {
+            if (key.startsWith("-")
+                    && i + 1 < args.size()
+                    && !args.get(i + 1).startsWith("-")) {
                 options.put(key, args.get(i + 1));
                 i++;
             }
@@ -35,16 +34,12 @@ class ArgParser {
     }
 
     public static DueDate parseDueDate(String date) {
-        try {
-            LocalTime localTime = LocalTime.now();
-            LocalDate localDate = LocalDate.parse(date);
-            ZoneId zoneId = ZoneId.systemDefault();
-            ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, localTime, zoneId);
-            return new DueDate(zonedDateTime);
-        } catch (DateTimeParseException e) {
-            System.err.printf("Error parsing date: %s", e.getMessage());
-            throw new IllegalArgumentException();
-        }
+        LocalTime localTime = LocalTime.now();
+        LocalDate localDate = LocalDate.parse(date);
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(localDate, localTime, zoneId);
+
+        return new DueDate(zonedDateTime);
     }
 
     String getFirst() {

@@ -8,7 +8,7 @@ import dev.norbu.donezo.cli.command.Help;
 import dev.norbu.donezo.cli.command.ListTasks;
 import dev.norbu.donezo.cli.command.Parser;
 import dev.norbu.donezo.cli.command.Update;
-import dev.norbu.donezo.service.TaskManager;
+import dev.norbu.donezo.service.TaskService;
 import dev.norbu.donezo.storage.InMemoryTaskRepository;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.Scanner;
 
 public class CLI {
 
-    private static final TaskManager taskManager = new TaskManager(new InMemoryTaskRepository());
+    private static final TaskService taskService = new TaskService(new InMemoryTaskRepository());
     private static final Scanner scanner = new Scanner(System.in);
     private static final Map<String, Command> commands = new HashMap<>();
 
@@ -36,11 +36,9 @@ public class CLI {
 
         while (true) {
             System.out.print("> ");
-            String line = scanner
-                    .nextLine()
-                    .trim();
+            String line = scanner.nextLine().trim();
 
-            if (line.isEmpty()) continue;
+            if (line.isBlank()) continue;
             if (line.equalsIgnoreCase("exit")) break;
 
             handleCommand(line);
@@ -52,20 +50,18 @@ public class CLI {
 
     private static void registerCommands() {
         commands.put(Constants.HELP_COMMAND, new Help(commands));
-        commands.put(Constants.LIST_COMMAND, new ListTasks(taskManager));
-        commands.put(Constants.ADD_COMMAND, new Add(taskManager));
-        commands.put(Constants.COMPLETE_COMMAND, new Complete(taskManager));
-        commands.put(Constants.UPDATE_COMMAND, new Update(taskManager));
-        commands.put(Constants.DELETE_COMMAND, new Delete(taskManager));
+        commands.put(Constants.LIST_COMMAND, new ListTasks(taskService));
+        commands.put(Constants.ADD_COMMAND, new Add(taskService));
+        commands.put(Constants.COMPLETE_COMMAND, new Complete(taskService));
+        commands.put(Constants.UPDATE_COMMAND, new Update(taskService));
+        commands.put(Constants.DELETE_COMMAND, new Delete(taskService));
     }
 
     private static void handleCommand(String input) {
         Parser.Result parsedCommand = Parser.parse(input);
         Command command = commands.get(parsedCommand.name());
         if (command != null) {
-            commands
-                    .get(parsedCommand.name())
-                    .execute(parsedCommand.args());
+            commands.get(parsedCommand.name()).execute(parsedCommand.args());
         } else {
             System.err.println("Invalid command. Type 'help' to see available commands.");
         }
