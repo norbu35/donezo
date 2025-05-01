@@ -15,9 +15,13 @@ public class ListTasks
 
     @Override
     public void execute(final List<String> args) {
-        System.out.println("Your tasks:\n");
-        taskService.findAll()
-                .forEach(System.out::println);
+        var tasks = taskService.findAll();
+        if (tasks.isEmpty()) {
+            System.out.println("You have no tasks yet.");
+        } else {
+            System.out.println("Your tasks:\n");
+            tasks.forEach(System.out::println);
+        }
     }
 
     @Override

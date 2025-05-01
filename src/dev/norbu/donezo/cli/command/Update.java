@@ -1,5 +1,7 @@
 package dev.norbu.donezo.cli.command;
 
+import dev.norbu.donezo.cli.exception.InvalidInputException;
+import dev.norbu.donezo.cli.exception.TaskNotFoundException;
 import dev.norbu.donezo.model.Description;
 import dev.norbu.donezo.model.DueDate;
 import dev.norbu.donezo.model.Task;
@@ -8,7 +10,6 @@ import dev.norbu.donezo.service.TaskService;
 
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class Update
         implements Command {
@@ -21,51 +22,48 @@ public class Update
 
     @Override
     public void execute(List<String> args) {
+        if (args.isEmpty()) {
+            throw new InvalidInputException("No task ID provided.");
+        }
+
+        String taskId = args.getFirst();
+        var argParser = new ArgParser(args.subList(1, args.size()));
         try {
-            String id = args.getFirst();
-            Task oldTask = taskService
-                    .getById(id)
-                    .orElseThrow();
-
-            var argParser = new ArgParser(args.subList(1, args.size()));
-
-            Title title = argParser
-                    .getValue("-t")
+            var oldTask = taskService.getById(taskId)
+                    .orElseThrow(() -> new TaskNotFoundException(taskId));
+            Title title = argParser.getValue("-t")
                     .map(Title::new)
                     .orElse(oldTask.getTitle());
-            Description description = argParser
-                    .getValue("-d")
+            Description description = argParser.getValue("-d")
                     .map(Description::new)
                     .orElse(oldTask.getDescription());
-            Task.Priority priority = argParser
-                    .getValue("-p")
+            Task.Priority priority = argParser.getValue("-p")
                     .map(Task.Priority::fromString)
                     .orElse(oldTask.getPriority());
-            DueDate dueDate = argParser
-                    .getValue("-due")
+            DueDate dueDate = argParser.getValue("-due")
                     .map(ArgParser::parseDueDate)
                     .orElse(oldTask.getDueDate());
-            Task.Status status = argParser
-                    .getValue("-s")
+            Task.Status status = argParser.getValue("-s")
                     .map(Task.Status::fromString)
                     .orElse(oldTask.getStatus());
 
             Task updatedTask =
-                    Task.of(oldTask.getId(),
-                            title,
-                            description,
-                            priority,
-                            dueDate,
-                            status);
+                    Task.of(oldTask.getId(), title, description, priority, dueDate, status);
 
-            taskService.save(updatedTask);
-            System.out.printf("Task with ID %s updated.%n", updatedTask.getId());
+            if (!updatedTask.equals(oldTask)) {
+                taskService.save(updatedTask);
+                System.out.printf("Task '%s' updated.%n", updatedTask.getId());
+            } else {
+                System.out.printf("Task '%s' not changed. No updates performed.", taskId);
+            }
         } catch (IllegalArgumentException | NullPointerException e) {
-            System.err.printf("Invalid input: %s", e.getMessage());
-        } catch (NoSuchElementException _) {
-            System.err.printf("Task with id %s not found", args.getFirst());
+            throw new InvalidInputException("Invalid input provided for one of the fields: ", e);
         } catch (DateTimeParseException e) {
-            System.err.println("Invalid date input: " + e.getMessage() + "\nUsage: yyyy-MM-dd.");
+            String failedDateString = e.getParsedString();
+            throw new InvalidInputException(String.format(
+                    "Invalid date format for: '%s'. Provide yyyy-MM-dd. Reason: %s",
+                    failedDateString,
+                    e));
         }
     }
 

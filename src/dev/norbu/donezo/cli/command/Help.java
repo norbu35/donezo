@@ -18,6 +18,7 @@ public class Help
         commands
                 .values()
                 .forEach(command -> System.out.println(command.description()));
+        System.out.println();
     }
 
     @Override

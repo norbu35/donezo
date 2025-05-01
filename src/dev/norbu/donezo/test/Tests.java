@@ -57,7 +57,7 @@ public class Tests {
                 .equals(Task.Status.COMPLETED);
 
         // Delete task
-        boolean success = taskService.deleteById(task3.getId());
-        assert success && taskService.getById(task3.getId()).isEmpty();
+        taskService.deleteById(task3.getId());
+        assert taskService.getById(task3.getId()).isEmpty();
     }
 }

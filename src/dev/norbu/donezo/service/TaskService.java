@@ -1,5 +1,6 @@
 package dev.norbu.donezo.service;
 
+import dev.norbu.donezo.cli.exception.TaskNotFoundException;
 import dev.norbu.donezo.model.Task;
 import dev.norbu.donezo.repository.TaskRepository;
 
@@ -20,28 +21,31 @@ public class TaskService {
         taskRepository.save(task);
     }
 
-    public boolean markAsCompleted(final String id) {
-        final var taskOptional = taskRepository.findById(id);
+    public void markAsCompleted(final String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Task ID cannot be null or blank.");
+        }
+        final Task task =
+                taskRepository.findById(id)
+                        .orElseThrow(() -> new TaskNotFoundException(id));
 
-        taskOptional.ifPresent(task -> {
-            if (task.getStatus() != Task.Status.COMPLETED) {
-                taskRepository.save(task.markAsCompleted());
-            }
-        });
-
-        return taskOptional.isPresent();
+        if (task.getStatus() == Task.Status.COMPLETED) {
+            System.out.printf("Task '%s' is already marked completed.", task.getId());
+        } else {
+            taskRepository.save(task.markAsCompleted());
+        }
     }
 
-    public boolean deleteById(final String id) {
+    public void deleteById(final String id) {
         if (id == null || id.isBlank()) {
-            throw new IllegalArgumentException("ID cannot be empty.");
+            throw new IllegalArgumentException("ID cannot be null or blank.");
         }
-        return taskRepository.deleteById(id);
+        taskRepository.deleteById(id);
     }
 
     public Optional<Task> getById(final String id) {
         if (id == null || id.isBlank()) {
-            throw new IllegalArgumentException("ID cannot be empty.");
+            throw new IllegalArgumentException("ID cannot be null or blank.");
         }
         return taskRepository.findById(id);
     }

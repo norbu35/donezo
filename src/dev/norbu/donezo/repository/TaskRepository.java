@@ -13,7 +13,7 @@ public interface TaskRepository {
 
     List<Task> findAll();
 
-    boolean deleteById(String id);
+    void deleteById(String id);
 
     void saveAll(List<Task> tasks);
 }

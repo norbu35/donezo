@@ -8,18 +8,20 @@ import dev.norbu.donezo.cli.command.Help;
 import dev.norbu.donezo.cli.command.ListTasks;
 import dev.norbu.donezo.cli.command.Parser;
 import dev.norbu.donezo.cli.command.Update;
+import dev.norbu.donezo.cli.exception.InvalidInputException;
+import dev.norbu.donezo.cli.exception.TaskNotFoundException;
 import dev.norbu.donezo.service.TaskService;
 import dev.norbu.donezo.storage.InMemoryTaskRepository;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Scanner;
+import java.util.SequencedMap;
 
 public final class CLI {
 
     private static final TaskService taskService = new TaskService(new InMemoryTaskRepository());
     private static final Scanner scanner = new Scanner(System.in);
-    private static final Map<String, Command> commands = new HashMap<>();
+    private static final SequencedMap<String, Command> commands = new LinkedHashMap<>();
 
     private CLI() {
     }
@@ -45,21 +47,25 @@ public final class CLI {
                 handleCommand(line);
             } catch (Exception e) {
                 System.err.println("An unexpected error occurred: " + e.getMessage());
-                e.printStackTrace();
             }
             System.out.println("Run another command or type 'exit' to quit.");
         }
-
         scanner.close();
     }
 
     private static void registerCommands() {
-        commands.put(Constants.HELP_COMMAND, new Help(commands));
-        commands.put(Constants.LIST_COMMAND, new ListTasks(taskService));
-        commands.put(Constants.ADD_COMMAND, new Add(taskService));
-        commands.put(Constants.COMPLETE_COMMAND, new Complete(taskService));
-        commands.put(Constants.UPDATE_COMMAND, new Update(taskService));
-        commands.put(Constants.DELETE_COMMAND, new Delete(taskService));
+        try {
+            commands.put(Constants.HELP_COMMAND, new Help(commands));
+            commands.put(Constants.LIST_COMMAND, new ListTasks(taskService));
+            commands.put(Constants.ADD_COMMAND, new Add(taskService));
+            commands.put(Constants.COMPLETE_COMMAND, new Complete(taskService));
+            commands.put(Constants.UPDATE_COMMAND, new Update(taskService));
+            commands.put(Constants.DELETE_COMMAND, new Delete(taskService));
+        } catch (InvalidInputException | TaskNotFoundException e) {
+            System.err.println(e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error occurred: " + e.getMessage());
+        }
     }
 
     private static void handleCommand(final String input) {

@@ -1,5 +1,6 @@
 package dev.norbu.donezo.cli.command;
 
+import dev.norbu.donezo.cli.exception.InvalidInputException;
 import dev.norbu.donezo.model.Description;
 import dev.norbu.donezo.model.DueDate;
 import dev.norbu.donezo.model.Task;
@@ -20,39 +21,42 @@ public class Add
 
     @Override
     public void execute(final List<String> args) {
-        try {
-            final var argParser = new ArgParser(args);
+        if (args.isEmpty()) {
+            throw new InvalidInputException("No fields for a new task provided.");
+        }
 
+        final var argParser = new ArgParser(args);
+
+        try {
             final Title title = Title.of(argParser.getFirst());
-            final Description taskDescription = argParser
-                    .getValue(Constants.DESCRIPTION_FLAG)
+            final Description taskDescription = argParser.getValue(Constants.DESCRIPTION_FLAG)
                     .map(Description::new)
                     .orElse(Description.empty());
-            final Task.Priority priority = argParser
-                    .getValue(Constants.PRIORITY_FLAG)
+            final Task.Priority priority = argParser.getValue(Constants.PRIORITY_FLAG)
                     .map(Task.Priority::fromString)
                     .orElse(Task.Priority.MEDIUM);
-            final DueDate dueDate = argParser
-                    .getValue(Constants.DUE_FLAG)
+            final DueDate dueDate = argParser.getValue(Constants.DUE_FLAG)
                     .map(ArgParser::parseDueDate)
                     .orElse(DueDate.inDays(3));
-            final Task.Status status = argParser
-                    .getValue(Constants.STATUS_FLAG)
+            final Task.Status status = argParser.getValue(Constants.STATUS_FLAG)
                     .map(Task.Status::fromString)
                     .orElse(Task.Status.PENDING);
 
-            final Task task =
-                    Task.builder(title)
-                            .description(taskDescription)
-                            .priority(priority)
-                            .dueDate(dueDate)
-                            .status(status)
-                            .build();
+            final Task task = Task.builder(title)
+                    .description(taskDescription)
+                    .priority(priority)
+                    .dueDate(dueDate)
+                    .status(status)
+                    .build();
             taskService.save(task);
         } catch (IllegalArgumentException | NullPointerException e) {
-            System.err.println("Invalid input: " + e.getMessage());
+            throw new InvalidInputException("Invalid input provided", e);
         } catch (DateTimeParseException e) {
-            System.err.println("Invalid date input: " + e.getMessage() + "\nUsage: yyyy-MM-dd.");
+            String failedString = e.getParsedString();
+            throw new InvalidInputException(
+                    String.format("Invalid date provided: '%s'. Expected " + "YYYY-MM-DD.",
+                                  failedString),
+                    e);
         }
     }
 
