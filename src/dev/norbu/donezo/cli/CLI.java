@@ -54,27 +54,33 @@ public final class CLI {
     }
 
     private static void registerCommands() {
+        commands.put(Constants.HELP_COMMAND, new Help(commands));
+        commands.put(Constants.LIST_COMMAND, new ListTasks(taskService));
+        commands.put(Constants.ADD_COMMAND, new Add(taskService));
+        commands.put(Constants.COMPLETE_COMMAND, new Complete(taskService));
+        commands.put(Constants.UPDATE_COMMAND, new Update(taskService));
+        commands.put(Constants.DELETE_COMMAND, new Delete(taskService));
+    }
+
+    private static void handleCommand(final String input) {
         try {
-            commands.put(Constants.HELP_COMMAND, new Help(commands));
-            commands.put(Constants.LIST_COMMAND, new ListTasks(taskService));
-            commands.put(Constants.ADD_COMMAND, new Add(taskService));
-            commands.put(Constants.COMPLETE_COMMAND, new Complete(taskService));
-            commands.put(Constants.UPDATE_COMMAND, new Update(taskService));
-            commands.put(Constants.DELETE_COMMAND, new Delete(taskService));
+            final Parser.Result parsedCommand = Parser.parse(input);
+
+            if (parsedCommand.name().isEmpty() && parsedCommand.args().isEmpty()) {
+                System.out.println("Blank commands given.");
+            }
+
+            final Command command = commands.get(parsedCommand.name());
+
+            if (command != null) {
+                commands.get(parsedCommand.name()).execute(parsedCommand.args());
+            } else {
+                System.err.println("Invalid command. Type 'help' to see available commands.");
+            }
         } catch (InvalidInputException | TaskNotFoundException e) {
             System.err.println(e.getMessage());
         } catch (Exception e) {
             System.err.println("Unexpected error occurred: " + e.getMessage());
-        }
-    }
-
-    private static void handleCommand(final String input) {
-        final Parser.Result parsedCommand = Parser.parse(input);
-        final Command command = commands.get(parsedCommand.name());
-        if (command != null) {
-            commands.get(parsedCommand.name()).execute(parsedCommand.args());
-        } else {
-            System.err.println("Invalid command. Type 'help' to see available commands.");
         }
     }
 }
